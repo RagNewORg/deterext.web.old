@@ -1,0 +1,79 @@
+<html>
+    <meta charset = "UTF-8">
+    <head>
+    </head>
+
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script>
+
+google.charts.load('visualization',"1", {'packages':['corechart']});
+//google.charts.setOnLoadCallback(drawChart);
+
+var display;
+var times = [];
+var interval = 0;
+var pics = 3;
+var currentPic = 0;
+var picNames = ['black-small','white-small'];
+var resolution = ['200*200', '200*200'];
+
+var options = {
+    title: 'SVG Filtering Times for Pictures with Different Resolutions',
+    vAxis: {title:"Image Resolution"},
+    hAxis: {title:"Processing Time (ms)"},
+    width: 900,
+    height: 500,
+    bar: {groupWidth: "95%"},
+    legend: { position: "none" },
+};
+
+var data = [['Picture','Time']];
+
+function execute(){
+    display = document.getElementById('frame');
+    display.src = 'floatpoint.html?img='+ picNames[currentPic] + '.png';
+}
+
+function finish(avg){
+    times.push(avg);
+    if(interval < 10){
+        interval++;
+        execute();
+    }
+    else{
+        interval = 0;
+        var sum = times.reduce(function(a, b) { return a+b; });
+        var average = -sum / times.length;
+        times.sort();
+        mid = -times[Math.round((times.length - 1) / 2)];
+        console.log(average,mid);
+        data.push([resolution[currentPic],mid]);
+        times = [];
+
+        if(currentPic == picNames.length-1){
+            drawChart();
+        }
+
+        if(currentPic < picNames.length-1){
+            currentPic++;
+            execute();
+        }
+    }
+}
+
+function drawChart() {
+    console.log(data);
+    var view = new google.visualization.DataView(google.visualization.arrayToDataTable(data));
+    var chart = new google.visualization.BarChart(document.getElementById("chart_div"));
+    chart.draw(view, options);
+}
+
+    </script>
+
+    <body onload="execute()">
+        <div id = 'chart_div' width=900 height=500></div>
+        <iframe id='frame' height=1080 width=1920></iframe>
+    </body>
+
+</html>
+

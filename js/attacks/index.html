@@ -1,0 +1,28 @@
+<html>
+    <meta charset="UTF-8">
+    <head>
+    </head>
+    <script>
+function test(url){
+    display = document.getElementById('display');
+    display.height = 500;
+    display.width = 900;
+    if(url == 'testSvg.html'){
+        display.height = 1000;
+        display.width = 2000;
+    }
+    display.src = url;
+
+}
+    </script>
+
+    <body onload = "test('testSvg.html')">
+        <div id = "buttons">
+            <button onclick = "test('testSvg.html')">SVG Filter Test</button>
+            <button onclick = "test('ScriptParse.html')">Script Parsing Test</button>
+            <button onclick = "test('ImageDecode.html')">Image Decoding Test</button>
+        </div>
+        <iframe id = "display"><\iframe>
+    </body>
+</html>
+

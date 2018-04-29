@@ -1,0 +1,52 @@
+<html>
+  <meta charset = "UTF-8">
+  <head>
+  </head>
+
+  <body>
+    <img id="e">
+    <svg>
+
+      <defs>
+        <filter id="morphology">
+          <feConvolveMatrix in="SourceGraphic"
+                        order="2 2" edgeMode="duplicate"
+                                    kernelMatrix=
+                                    "1e-42 1e-42 1e-42 1e-42"
+                                    preserveAlpha="false" />
+        </filter>
+      </defs>
+      <img id="e" style="filter:url(#morphology);">
+    </svg>
+    <script>
+var element = document.getElementById('e');
+element.src = location.search.split('img=')[1];
+var count = 10;
+var times = [];
+var lastTime = 0;
+var interval = 1;
+var avg = 0;
+function loop(t){
+  var diff = lastTime-t;
+  lastTime = t;
+  if (element.classList.contains('f'))
+    times.push(diff);
+  element.classList.toggle('f');
+  if (count--){
+    requestAnimationFrame(loop);
+  }
+  else{
+    var sum = times.reduce(function(a, b) { return a + b; });
+    avg = sum / times.length;
+    times.sort();
+    mid = times[Math.round((times.length - 1) / 2)];
+    console.log(avg,mid);
+    parent.finish(mid);
+  }
+}
+requestAnimationFrame(loop);
+    </script>
+  </body>
+
+</html>
+
