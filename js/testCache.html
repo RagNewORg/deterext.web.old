@@ -1,0 +1,115 @@
+<html>
+  <meta charset = "UTF-8">
+  <head>
+  </head>
+
+  <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+  <script>
+
+google.charts.load('visualization',"1", {'packages':['corechart']});
+
+var options = {
+  title: 'Cache Attacks',
+  vAxis: {title:"Data Location"},
+  hAxis: {title:"Accessing Time (ms)"},
+  width: 900,
+  height: 500,
+  bar: {groupWidth: "95%"},
+  legend: { position: "none" },
+};
+
+var data = [['Location','Time']];
+
+function execute(){
+
+  function nextedge(){
+    start = performance.now();
+    stop = start;
+    count = 0;
+    while(start == stop){
+      stop = performance.now();
+      count++;
+    }
+    return [count,start,stop];
+  }
+
+  var evictionBuffer = new ArrayBuffer(8192 * 1024);
+  var evictionView = new DataView(evictionBuffer);
+  var current;
+  var flushedTotal = 0;
+  var unflushedTotal = 0;
+
+  var tries = 1;
+  var tests = 50;
+
+  var last = (8192 * 1023) / 64 - 10;
+
+  var correct_count = 0;
+  var wrong_count = 0;
+
+  var MAX = 0;
+  for(i = 0; i < 100; i++){
+    nextedge();
+    [exp,pre,start] = nextedge();
+    MAX = Math.max(exp, MAX);
+  }
+  exp = MAX;
+  grain = start - pre;
+
+  for (var c = 0; c < tests; c++) {
+
+    for (var i = 0; i < ((8192 * 1023) / 64); i++) { 
+      if(i != last)current = evictionView.getUint32(i * 64); 
+    }
+
+    nextedge();
+    [exp1,pre,start] = nextedge();
+    current = evictionView.getUint32(last);  //1 is the page
+    [remain,stop,post] = nextedge();
+    flushedTime = (stop-start)+((exp-remain)/exp)*grain;
+    flushedTotal += flushedTime;
+
+
+    for (var i = 0; i < ((8192 * 1023) / 64); i++) { 
+      current = evictionView.getUint32(i * 64); 
+    }
+
+
+    nextedge();
+    [exp1,pre,start] = nextedge();
+    current = evictionView.getUint32(last);  //1 is the page
+    [remain,stop,post] = nextedge();
+    unflushedTime = (stop-start)+((exp-remain)/exp)*grain;
+    unflushedTotal += unflushedTime;
+
+    if(unflushedTime > flushedTime)correct_count++;          
+    if(flushedTime > unflushedTime)wrong_count++;           
+  }
+
+  console.log(flushedTotal, unflushedTotal,correct_count,wrong_count);
+
+  console.log({
+    flushedAverage: flushedTotal / tests,
+    unflushedAverage: unflushedTotal / tests,
+  });
+
+  data.push(['Memory', flushedTotal / tests]);
+  data.push(['Cache', unflushedTotal / tests])
+
+    drawChart();
+}
+
+function drawChart() {
+  console.log(data);
+  var view = new google.visualization.DataView(google.visualization.arrayToDataTable(data));
+  var chart = new google.visualization.BarChart(document.getElementById("chart_div"));
+  chart.draw(view, options);
+}
+
+  </script>
+
+  <body onload="execute()">
+    <div id = 'chart_div' width=900 height=500></div>
+  </body>
+
+</html>
