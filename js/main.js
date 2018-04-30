@@ -17,6 +17,9 @@ document.getElementById('script-test-button').onclick = function(){
 document.getElementById('image-test-button').onclick = function(){
     test('./js/ImageDecode.html');
 };
+document.getElementById('image-async-test-button').onclick = function(){
+    test('./js/ImageDecode_async.html');
+};
 document.getElementById('float-test-button').onclick = function(){
     test('./js/testFloat.html');
 };
