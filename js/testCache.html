@@ -21,80 +21,113 @@ var options = {
 var data = [['Location','Time']];
 
 function execute(){
-
-  function nextedge(){
-    start = performance.now();
-    stop = start;
-    count = 0;
-    while(start == stop){
-      stop = performance.now();
-      count++;
+/**
+ * Waits until the next tick of performance.now(). Returns an array of the following:
+ * [0] - the counter value representing the time until the next tick
+ * [1] - the value of performance.now upon calling this function
+ * [2] - the value of performance.now after ticking
+ */
+function nextClockEdge() {
+    let start = performance.now();
+    let stop = start;
+    let counter = 0;
+    while (start === stop) {
+        stop = performance.now();
+        counter++;
     }
-    return [count,start,stop];
-  }
+    return [counter, start, stop];
+}
 
-  var evictionBuffer = new ArrayBuffer(8192 * 1024);
-  var evictionView = new DataView(evictionBuffer);
-  var current;
-  var flushedTotal = 0;
-  var unflushedTotal = 0;
-
-  var tries = 1;
-  var tests = 50;
-
-  var last = (8192 * 1023) / 64 - 10;
-
-  var correct_count = 0;
-  var wrong_count = 0;
-
-  var MAX = 0;
-  for(i = 0; i < 100; i++){
-    nextedge();
-    [exp,pre,start] = nextedge();
-    MAX = Math.max(exp, MAX);
-  }
-  exp = MAX;
-  grain = start - pre;
-
-  for (var c = 0; c < tests; c++) {
-
-    for (var i = 0; i < ((8192 * 1023) / 64); i++) { 
-      if(i != last)current = evictionView.getUint32(i * 64); 
-    }
-
-    nextedge();
-    [exp1,pre,start] = nextedge();
-    current = evictionView.getUint32(last);  //1 is the page
-    [remain,stop,post] = nextedge();
-    flushedTime = (stop-start)+((exp-remain)/exp)*grain;
-    flushedTotal += flushedTime;
-
-
-    for (var i = 0; i < ((8192 * 1023) / 64); i++) { 
-      current = evictionView.getUint32(i * 64); 
+/** Run the attack on the client computer's cache. */
+function doCacheAttack() {
+    // Get the greatest number of counter increments between two ticks of performance.now
+    for (let i = 0; i < 100; i++) {
+        nextClockEdge();
+        [counter, clockStart, clockStop] = nextClockEdge();
+        timeToTick = Math.max(counter, timeToTick);
+        grain = clockStop - clockStart;
     }
 
 
-    nextedge();
-    [exp1,pre,start] = nextedge();
-    current = evictionView.getUint32(last);  //1 is the page
-    [remain,stop,post] = nextedge();
-    unflushedTime = (stop-start)+((exp-remain)/exp)*grain;
-    unflushedTotal += unflushedTime;
+    // Run the entire test numerous times
+    for (let testNum = 0; testNum < numTests; testNum++) {
 
-    if(unflushedTime > flushedTime)correct_count++;          
-    if(flushedTime > unflushedTime)wrong_count++;           
-  }
+        // Access each 64 byte offset into the array to evict parts of cache lines
+        // (we do not include targetIndex in the ArrayBuffer to measure uncached access time)
+        for (let i = 0; i < ((8192 * 1023) / 64); i++) {
+            if (i !== targetIndex) {
+                current = evictionView.getUint32(i * 64);
+            }
+        }
 
-  console.log(flushedTotal, unflushedTotal,correct_count,wrong_count);
+        // Log the time it takes to access part of memory that does not exist in the cache
+        [counter1, start1, stop1] = nextClockEdge();
+        current = evictionView.getUint32(targetIndex);
+        [countRemaining, start2, stop2] = nextClockEdge();
 
-  console.log({
-    flushedAverage: flushedTotal / tests,
-    unflushedAverage: unflushedTotal / tests,
-  });
+        let uncachedTime = (start2 - stop1) + ((timeToTick - countRemaining) / timeToTick) * grain;
+        uncachedTotal += uncachedTime;
 
-  data.push(['Memory', flushedTotal / tests]);
-  data.push(['Cache', unflushedTotal / tests])
+        // Again, access each 64 byte offset into the array to evict parts of the cache lines,
+        // this time including the targetIndex so that it will be cached
+        for (let i = 0; i < ((8192 * 1023) / 64); i++) {
+            current = evictionView.getUint32(i * 64);
+        }
+
+        // Log the time it takes to access part of memory that is in the cache
+        [counter1, start1, stop1] = nextClockEdge();
+        current = evictionView.getUint32(targetIndex);
+        [countRemaining, start2, stop2] = nextClockEdge();
+
+        let cachedTime = (start2 - stop1) + ((timeToTick - countRemaining) / timeToTick) * grain;
+        cachedTotal += cachedTime;
+
+        // Log whether the times measured are as expected (cached access should be faster)
+        if (uncachedTime > cachedTime) {
+            numCorrectTimings++;
+        }
+    }
+}
+
+/** Kick off the cache attack, and output the results to the body of the page */
+function cacheAttack() {
+    timesRan++;
+    doCacheAttack();
+
+    // Output the results
+    let uncachedTimeElement = document.createElement("p");
+    let cachedTimeElement = document.createElement("p");
+    let correctnessElement = document.createElement("p");
+
+    uncachedTimeElement.innerHTML = ("Average time for an uncached access: " + (uncachedTotal / (numTests * timesRan)));
+    document.body.appendChild(uncachedTimeElement);
+    cachedTimeElement.innerHTML = ("Average time for an cached access: " + (cachedTotal / (numTests * timesRan)));
+    document.body.appendChild(cachedTimeElement);
+    correctnessElement.innerHTML = ("Uncached accesses took longer than cached accesses " + numCorrectTimings + " out of " + (numTests * timesRan) + " times.");
+    document.body.appendChild(correctnessElement);
+}
+
+/** Code to run immediately, possibly before the window has finished loading. */
+let evictionBuffer = new ArrayBuffer(8192 * 1024);  // Our buffer with a size of 8 MB
+let evictionView = new DataView(evictionBuffer);  // A view of the buffer, where each index can grab a multiple of bytes at a time
+
+let current;    // Global variable used to store bytes returned from view while looping
+let cachedTotal = 0;   // The total amount of time it took to fetch multiple test values from the cache
+let uncachedTotal = 0; // The total amount of time it took to fetch multiple test values from main memory
+let timesRan = 0;   // The number of times the cache attack has been ran in this session
+let numTests = 10; // The number of tests to perform
+
+let targetIndex = (8192 * 1023) / 64 - 10;    // A single 64 byte block that will not be accessed when initially evicting
+let numCorrectTimings = 0;  // The amount of times in which accesses to main memory correctly took longer than accesses to the cache
+
+let timeToTick = 0; // Time in between ticks of performance.now
+let grain;  // The supposed difference between two ticks of performance.now
+
+    timesRan++;
+    doCacheAttack();
+
+  data.push(['Memory', (uncachedTotal / (numTests * timesRan))]);
+  data.push(['Cache', (cachedTotal / (numTests * timesRan))])
 
     drawChart();
 }
