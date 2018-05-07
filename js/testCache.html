@@ -148,11 +148,11 @@ let grain;  // The supposed difference between two ticks of performance.now
   data.push(['Memory', (uncachedTotal / (numTests * timesRan))]);
   data.push(['Cache', (cachedTotal / (numTests * timesRan))])
 
-    drawChart();
     console.log("Average time for an uncached access: " + (uncachedTotal / (numTests * timesRan)));
     console.log("Stadard deviation for an uncached access: " + uncachedList.stanDeviate());
     console.log("Average time for an cached access: " + (cachedTotal / (numTests * timesRan)));
     console.log("Stadard deviation for an cached access: " + cachedList.stanDeviate());
+    drawChart();
 }
 
 function drawChart() {

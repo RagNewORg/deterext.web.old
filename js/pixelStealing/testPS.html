@@ -23,6 +23,17 @@ Array.prototype.stanDeviate = function(){
           })/this.length));
 };
 
+function nextedge(){
+    start = performance.now();
+    stop = start;
+    count = 0;
+    while(start == stop){
+        stop = performance.now();
+        count++;
+    }
+    return [count,start,stop];
+}
+
 var display;
 var times = [];
 var interval = 0;
@@ -44,14 +55,24 @@ var options = {
 var data = [['Picture','Time']];
 var pre=[];
 
+//calculate tick grain
+var tick_grain = 1;
+for(i = 0; i < 100; i++){
+    nextedge();
+    [exp,start,stop] = nextedge();
+    tick_grain = Math.min((stop-start)/exp, tick_grain);
+}
+//console.log("grain: ", tick_grain);
+
+
 function execute(){
     display = document.getElementById('frame');
-    display.src = 'pixelStealing.html?img='+ picNames[currentPic] + '.png';
+    display.src = 'pixelStealing.html?img='+ picNames[currentPic] + '.png' + '&grain=' + tick_grain;
 }
 
 function finish(avg){
     times.push(avg);
-    if(interval < 20){
+    if(interval < 9){
         interval++;
         execute();
     }
