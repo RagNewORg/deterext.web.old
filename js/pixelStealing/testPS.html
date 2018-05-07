@@ -42,6 +42,7 @@ var options = {
 };
 
 var data = [['Picture','Time']];
+var pre=[];
 
 function execute(){
     display = document.getElementById('frame');
@@ -50,7 +51,7 @@ function execute(){
 
 function finish(avg){
     times.push(avg);
-    if(interval < 10){
+    if(interval < 20){
         interval++;
         execute();
     }
@@ -63,6 +64,16 @@ function finish(avg){
         mid = times[Math.round((times.length - 1) / 2)];
         //console.log(average,mid);
         data.push([resolution[currentPic],mid]);
+        first = 0;
+        second = 0;
+        if(pre.length > 0){
+            for(var i = 0; i < pre.length; i++){
+                if(pre[i] > times[i])first++;
+                else second++;
+            }
+            console.log("result", first, second);
+        }
+        pre = times;
         times = [];
 
         if(currentPic == picNames.length-1){
