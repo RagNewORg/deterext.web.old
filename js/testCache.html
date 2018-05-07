@@ -6,7 +6,24 @@
   <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
   <script>
 
-google.charts.load('visualization',"1", {'packages':['corechart']});
+//google.charts.load('visualization',"1", {'packages':['corechart']});
+
+Array.prototype.stanDeviate = function(){
+   var i,j,total = 0, mean = 0, diffSqredArr = [];
+   for(i=0;i<this.length;i+=1){
+       total+=this[i];
+   }
+   mean = total/this.length;
+   for(j=0;j<this.length;j+=1){
+       diffSqredArr.push(Math.pow((this[j]-mean),2));
+   }
+   return (Math.sqrt(diffSqredArr.reduce(function(firstEl, nextEl){
+            return firstEl + nextEl;
+          })/this.length));
+};
+
+var cachedList=[];
+var uncachedList=[];
 
 var options = {
   title: 'Cache Attacks',
@@ -67,6 +84,7 @@ function doCacheAttack() {
 
         let uncachedTime = (start2 - stop1) + ((timeToTick - countRemaining) / timeToTick) * grain;
         uncachedTotal += uncachedTime;
+        uncachedList.push(uncachedTime);
 
         // Again, access each 64 byte offset into the array to evict parts of the cache lines,
         // this time including the targetIndex so that it will be cached
@@ -81,6 +99,7 @@ function doCacheAttack() {
 
         let cachedTime = (start2 - stop1) + ((timeToTick - countRemaining) / timeToTick) * grain;
         cachedTotal += cachedTime;
+        cachedList.push(cachedTime);
 
         // Log whether the times measured are as expected (cached access should be faster)
         if (uncachedTime > cachedTime) {
@@ -129,7 +148,11 @@ let grain;  // The supposed difference between two ticks of performance.now
   data.push(['Memory', (uncachedTotal / (numTests * timesRan))]);
   data.push(['Cache', (cachedTotal / (numTests * timesRan))])
 
-    drawChart();
+    //drawChart();
+    console.log("Average time for an uncached access: " + (uncachedTotal / (numTests * timesRan)));
+    console.log("Stadard deviation for an uncached access: " + uncachedList.stanDeviate());
+    console.log("Average time for an cached access: " + (cachedTotal / (numTests * timesRan)));
+    console.log("Stadard deviation for an cached access: " + cachedList.stanDeviate());
 }
 
 function drawChart() {

@@ -1,0 +1,39 @@
+<html>
+    <meta charset = "UTF-8">
+    <head>
+    </head>
+    </style>
+
+    <body>
+	<div id='links'></div>
+        <script>
+var container = document.getElementById('links');
+var tries = 5;
+var base = 0;
+
+function base(){
+    ele = document.createElement('a');
+    ele.innerHTML = '############';
+    ele.href="http://deterext.github.io";
+    count = 0;
+    
+    function cb(t){
+        count++;
+        if(t-start > base)base = t- start;
+        start = performance.now();
+        if(count < tries)requestAnimationFrame(cb);
+    }
+    start = performance.now();
+    requestAnimationFrame(cb);
+}
+
+function test(link){
+    ele = document.createElement('a');
+    ele.innerHTML = '############';
+    
+    for(i = 0; i < tries; i++)
+}
+        </script>
+    </body>
+
+</html>

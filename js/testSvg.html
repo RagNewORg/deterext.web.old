@@ -9,13 +9,30 @@
 google.charts.load('visualization',"1", {'packages':['corechart']});
 //google.charts.setOnLoadCallback(drawChart);
 
+Array.prototype.stanDeviate = function(){
+   var i,j,total = 0, mean = 0, diffSqredArr = [];
+   for(i=0;i<this.length;i+=1){
+       total+=this[i];
+   }
+   mean = total/this.length;
+   for(j=0;j<this.length;j+=1){
+       diffSqredArr.push(Math.pow((this[j]-mean),2));
+   }
+   return (Math.sqrt(diffSqredArr.reduce(function(firstEl, nextEl){
+            return firstEl + nextEl;
+          })/this.length));
+};
+
+var bigList=[];
+var smallList=[];
+
 var display;
 var times = [];
 var interval = 0;
 var pics = 3;
 var currentPic = 0;
-var picNames = ['noise-big','noise-vsmall'];
-var resolution = ['1920*1080', '10*10'];
+var picNames = ['noise-small','noise-vsmall'];
+var resolution = ['200*200','10*10'];
 
 var options = {
     title: 'SVG Filtering Times for Pictures with Different Resolutions',
@@ -43,9 +60,9 @@ function finish(avg){
     else{
         interval = 0;
         var sum = times.reduce(function(a, b) { return a+b; });
-        var average = -sum / times.length;
+        var average = sum / times.length;
         times.sort();
-        mid = -times[Math.round((times.length - 1) / 2)];
+        mid = times[Math.round((times.length - 1) / 2)];
         console.log(average,mid);
         data.push([resolution[currentPic],mid]);
         times = [];

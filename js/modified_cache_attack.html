@@ -9,6 +9,23 @@
     <h1>Cache Attack Example</h1>
     <script>
 
+Array.prototype.stanDeviate = function(){
+   var i,j,total = 0, mean = 0, diffSqredArr = [];
+   for(i=0;i<this.length;i+=1){
+       total+=this[i];
+   }
+   mean = total/this.length;
+   for(j=0;j<this.length;j+=1){
+       diffSqredArr.push(Math.pow((this[j]-mean),2));
+   }
+   return (Math.sqrt(diffSqredArr.reduce(function(firstEl, nextEl){
+            return firstEl + nextEl;
+          })/this.length));
+};
+
+unflushed = []
+flushed = []
+
 function nextedge(){
 start = performance.now();
 stop = start;
@@ -60,6 +77,7 @@ return [count,start,stop];
             //console.log(stop,start,exp,remain,grain,(stop-start)+((exp-remain)/exp)*grain);
             unflushedTime = (stop-start)+((exp-remain)/exp)*grain;
             unflushedTotal += unflushedTime;
+            unflushed.push(unflushedTime);
 
             //var endFirst = window.performance.now();
             //unflushedTotal += endFirst - beginFirst;
@@ -89,6 +107,7 @@ return [count,start,stop];
             //console.log(stop,start,exp,remain,grain,(stop-start)+((exp-remain)/exp)*grain);
             flushedTime = (stop-start)+((exp-remain)/exp)*grain;
             flushedTotal += flushedTime;
+            flushed.push(flushedTime);
 
             //var endSecond = window.performance.now();
             //flushedTotal += endSecond - beginSecond;  
@@ -108,6 +127,9 @@ return [count,start,stop];
         document.write("flushedAverage: (" + flushedTotal + ")\n");
         document.write("unflushedAverage: (" + unflushedTotal + ")\n");
         document.write("count: (" + correct_count + ")\n");
+
+        console.log(flushed.stanDeviate());
+        console.log(unflushed.stanDeviate());
 
     </script>
 </body>

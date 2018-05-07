@@ -2,46 +2,74 @@
     <meta charset = "UTF-8">
     <head>
     </head>
-    <style>.f { filter: url(#morphology) }
+    <style>
+        .f { filter: url(#morphology) }
+        .timing {
+          filter: url(#timing);
+        }
     </style>
 
     <body>
         <img id="e">
         <svg>
-            <!-- <filter id="threshold" color-interpolation-filters="sRGB">
-            <feColorMatrix type="matrix" 
-                           values="0.333 0.333 0.333 0 -.16
-                           0.333 0.333 0.333 0 -.16
-                           0.333 0.333 0.333 0 -.16
-                           0     0     0     0 1"
-                           />
-            <feComponentTransfer>
-            <feFuncR type="discrete" tableValues="1 0" />
-            <feFuncG type="discrete" tableValues="1 0" />
-            <feFuncB type="discrete" tableValues="1 0" />
-            </feCompnentTransfer>
-            </filter>-->
 
-            <filter id="morphology">
-                <feMorphology operator="erode" radius="3">
+
+            <filter id="timing1">
+                <feMorphology operator="erode" radius="10">
                 </filter>
+
+<filter id="timing" filterRes="172">
+ <feImage xlink:href="noise.png">
+ <feComposite in2="SourceGraphic" operator="arithmetic" k1="1">
+ <feMorphology operator="erode" radius="30">
+</filter>
+
         </svg>
         <script>
+function nextedge(){
+    start = performance.now();
+    stop = start;
+    count = 0;
+    while(start == stop){
+        stop = performance.now();
+        count++;
+    }
+    return [count,start,stop];
+}
+//calculate tick grain
+var tick_grain = 1;
+for(i = 0; i < 100; i++){
+    nextedge();
+    [exp,start,stop] = nextedge();
+    tick_grain = Math.min((stop-start)/exp, tick_grain);
+}
+//console.log("grain: ", tick_grain);
+
 var element = document.getElementById('e');
 element.src = location.search.split('img=')[1];
-var count = 10;
+var test_count = 10;
 var times = [];
 var lastTime = 0;
 var interval = 1;
 var avg = 0;
 
-function loop(t){
-    var diff = lastTime-t;
-    lastTime = t;
-    if (element.classList.contains('f'))
-        times.push(diff);
+var result = [];
+var checks = 5;
+
+
+/*function loop(t){
+    //clock edge get end
+    [remain,stop,post] = nextedge();
+    var hrt_end = post - remain * tick_grain;
+    var diff = hrt_end-hrt_st;
+    //console.log(diff);
+    if (element.classList.contains('f'))times.push(diff);
     element.classList.toggle('f');
-    if (count--){
+    if (test_count!=0){
+        test_count--;
+        //clock edge get start
+        nextedge();
+        [exp,pre,hrt_st] = nextedge();
         requestAnimationFrame(loop);
     }
     else{
@@ -49,19 +77,78 @@ function loop(t){
         avg = sum / times.length;
         times.sort();
         mid = times[Math.round((times.length - 1) / 2)];
-        console.log(avg,mid);
-        //parent.finish(avg);
-        parent.finish(mid);
-        /*if(interval < 2){
-          interval++;
-          times = [];
-          lastTime = 0;
-          count = 10;
-          requestAnimationFrame(loop);
-          }*/
+        //console.log(avg,mid);
+        parent.finish(avg);
+        //parent.finish(mid);
     }
+
+    var pixel = document.getElementById("e");
+    pixel.classList.add("timing");
+    //var hrt_st = performance.now();
+    //clock edge get start
+    nextedge();
+    [exp,pre,hrt_st] = nextedge();
+    requestAnimationFrame(function(startTime) {
+        //clock edge get end
+        [remain,stop,post] = nextedge();
+        var hrt_end = post - remain * tick_grain;
+        //var hrt_end = performance.now();
+        pixel.classList.remove("timing");
+        requestAnimationFrame(function(endTime) {
+            if((hrt_end - hrt_st) < 12) {
+                requestAnimationFrame(loop);
+                //done(endTime - startTime);
+            } else {
+                result.push(hrt_end - hrt_st);
+                if(checks != 0){
+                    l(done);
+                    checks--;
+                }else{
+                    //console.log(result.length);
+                    parent.finish(result.reduce(function(a, b) { return a + b; })/result.length);
+                    //done(median(result));
+                }
+            }
+        });
+    });
 }
-requestAnimationFrame(loop);
+requestAnimationFrame(loop);*/
+
+//clock edge get start
+nextedge();
+[exp,pre,hrt_st] = nextedge();
+function getTiming(done) {
+    var target = document.getElementById("e");
+    target.classList.add("timing");
+    //var hrt_st = performance.now();
+    //clock edge get start
+    nextedge();
+    [exp,pre,hrt_st] = nextedge();
+    requestAnimationFrame(function(startTime) {
+        //clock edge get end
+        [remain,stop,post] = nextedge();
+        var hrt_end = post - remain * tick_grain;
+        //var hrt_end = performance.now();
+        target.classList.remove("timing");
+        requestAnimationFrame(function(endTime) {
+            if((hrt_end - hrt_st) < 12) {
+                getTiming(done);
+                //done(endTime - startTime);
+            } else {
+                result.push(hrt_end - hrt_st);
+                if(checks != 0){
+                    getTiming(done);
+                    checks--;
+                }else{
+                    //console.log(result.length);
+                    done(result.reduce(function(a, b) { return a + b; })/result.length);
+                    //done(median(result));
+                }
+            }
+        });
+    });
+}
+getTiming(parent.finish);
         </script>
     </body>
 
