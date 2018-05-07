@@ -36,17 +36,10 @@ function nextedge(){
     }
     return [count,start,stop];
 }
-//calculate tick grain
-var tick_grain = 1;
-for(i = 0; i < 100; i++){
-    nextedge();
-    [exp,start,stop] = nextedge();
-    tick_grain = Math.min((stop-start)/exp, tick_grain);
-}
-//console.log("grain: ", tick_grain);
 
 var element = document.getElementById('e');
-element.src = location.search.split('img=')[1];
+element.src = location.search.split('img=')[1].split('&')[0];
+tick_grain = location.search.split('grain=')[1];
 var test_count = 10;
 var times = [];
 var lastTime = 0;
@@ -54,7 +47,7 @@ var interval = 1;
 var avg = 0;
 
 var result = [];
-var checks = 5;
+var checks = 10;
 
 
 /*function loop(t){

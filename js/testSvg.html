@@ -43,14 +43,32 @@ var options = {
 
 var data = [['Picture','Time']];
 
+function nextedge(){
+    start = performance.now();
+    stop = start;
+    count = 0;
+    while(start == stop){
+        stop = performance.now();
+        count++;
+    }
+    return [count,start,stop];
+}
+//calculate tick grain
+var tick_grain = 1;
+for(i = 0; i < 100; i++){
+    nextedge();
+    [exp,start,stop] = nextedge();
+    tick_grain = Math.min((stop-start)/exp, tick_grain);
+}
+
 function execute(){
     display = document.getElementById('frame');
-    display.src = 'SvgFilter.html?img='+ picNames[currentPic] + '.png';
+    display.src = 'SvgFilter.html?img='+ picNames[currentPic] + '.png' + '&grain=' + tick_grain;;
 }
 
 function finish(avg){
     times.push(avg);
-    if(interval < 5){
+    if(interval < 4){
         interval++;
         execute();
     }
