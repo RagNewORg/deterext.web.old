@@ -23,9 +23,6 @@ Array.prototype.stanDeviate = function(){
           })/this.length));
 };
 
-var bigList=[];
-var smallList=[];
-
 var display;
 var times = [];
 var interval = 0;
@@ -53,17 +50,18 @@ function execute(){
 
 function finish(avg){
     times.push(avg);
-    if(interval < 10){
+    if(interval < 5){
         interval++;
         execute();
     }
     else{
         interval = 0;
+        console.log(resolution[currentPic],times.stanDeviate());
         var sum = times.reduce(function(a, b) { return a+b; });
         var average = sum / times.length;
         times.sort();
         mid = times[Math.round((times.length - 1) / 2)];
-        console.log(average,mid);
+        //console.log(average,mid);
         data.push([resolution[currentPic],mid]);
         times = [];
 
