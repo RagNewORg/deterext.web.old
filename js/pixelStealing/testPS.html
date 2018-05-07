@@ -1,0 +1,93 @@
+<html>
+    <meta charset = "UTF-8">
+    <head>
+    </head>
+
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script>
+
+google.charts.load('visualization',"1", {'packages':['corechart']});
+//google.charts.setOnLoadCallback(drawChart);
+
+Array.prototype.stanDeviate = function(){
+   var i,j,total = 0, mean = 0, diffSqredArr = [];
+   for(i=0;i<this.length;i+=1){
+       total+=this[i];
+   }
+   mean = total/this.length;
+   for(j=0;j<this.length;j+=1){
+       diffSqredArr.push(Math.pow((this[j]-mean),2));
+   }
+   return (Math.sqrt(diffSqredArr.reduce(function(firstEl, nextEl){
+            return firstEl + nextEl;
+          })/this.length));
+};
+
+var display;
+var times = [];
+var interval = 0;
+var pics = 3;
+var currentPic = 0;
+var picNames = ['white-small','black-small'];
+var resolution = ['white','black'];
+
+var options = {
+    title: 'Times for Pictures with Different Color',
+    vAxis: {title:"Image Resolution"},
+    hAxis: {title:"Processing Time (ms)"},
+    width: 900,
+    height: 500,
+    bar: {groupWidth: "95%"},
+    legend: { position: "none" },
+};
+
+var data = [['Picture','Time']];
+
+function execute(){
+    display = document.getElementById('frame');
+    display.src = 'pixelStealing.html?img='+ picNames[currentPic] + '.png';
+}
+
+function finish(avg){
+    times.push(avg);
+    if(interval < 10){
+        interval++;
+        execute();
+    }
+    else{
+        interval = 0;
+        console.log(resolution[currentPic],times.stanDeviate());
+        var sum = times.reduce(function(a, b) { return a+b; });
+        var average = sum / times.length;
+        times.sort();
+        mid = times[Math.round((times.length - 1) / 2)];
+        //console.log(average,mid);
+        data.push([resolution[currentPic],mid]);
+        times = [];
+
+        if(currentPic == picNames.length-1){
+            drawChart();
+        }
+
+        if(currentPic < picNames.length-1){
+            currentPic++;
+            execute();
+        }
+    }
+}
+
+function drawChart() {
+    console.log(data);
+    var view = new google.visualization.DataView(google.visualization.arrayToDataTable(data));
+    var chart = new google.visualization.BarChart(document.getElementById("chart_div"));
+    chart.draw(view, options);
+}
+
+    </script>
+
+    <body onload="execute()">
+        <div id = 'chart_div' width=900 height=500></div>
+        <iframe id='frame' height=1080 width=1920></iframe>
+    </body>
+
+</html>

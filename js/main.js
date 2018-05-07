@@ -21,5 +21,5 @@ document.getElementById('image-async-test-button').onclick = function(){
     test('./js/ImageDecode_async.html');
 };
 document.getElementById('float-test-button').onclick = function(){
-    test('./js/testFloat.html');
+    test('./js/pixelStealing/testPS.html');
 };
