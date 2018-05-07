@@ -19,9 +19,8 @@
                 </filter>
 
 <filter id="timing" filterRes="172">
- <feImage xlink:href="noise.png">
  <feComposite in2="SourceGraphic" operator="arithmetic" k1="1">
- <feMorphology operator="erode" radius="30">
+ <feMorphology operator="erode" radius="13">
         <feColorMatrix type="matrix" values="
         0 0 0  0 0
         0 0 0  0 0
@@ -52,14 +51,14 @@ for(i = 0; i < 100; i++){
 
 var element = document.getElementById('e');
 element.src = location.search.split('img=')[1];
-var test_count = 5;
+
 var times = [];
 var lastTime = 0;
 var interval = 1;
 var avg = 0;
 
 var result = [];
-var checks = 5;
+var checks = 1;
 
 //clock edge get start
 nextedge();
