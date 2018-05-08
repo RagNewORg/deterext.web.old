@@ -45,8 +45,8 @@ function doScriptParse(index)
             doScriptParse(index);
         }else{
             timeofsp.sort(sortNumber);
-            res = timeofsp.reduce(function(a, b) { return a+b; }) / timeofsp.length;
-            //res = timeofsp[Math.floor(timeofsp.length/2)];
+            //res = timeofsp.reduce(function(a, b) { return a+b; }) / timeofsp.length;
+            res = timeofsp[Math.floor(timeofsp.length/2)];
             timesofsp.push([index*1.2,res]);
             
             timeofsp = [];
