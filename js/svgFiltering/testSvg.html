@@ -1,0 +1,119 @@
+<html>
+    <meta charset = "UTF-8">
+    <head>
+    </head>
+
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script>
+
+google.charts.load('visualization',"1", {'packages':['corechart']});
+//google.charts.setOnLoadCallback(drawChart);
+
+Array.prototype.stanDeviate = function(){
+   var i,j,total = 0, mean = 0, diffSqredArr = [];
+   for(i=0;i<this.length;i+=1){
+       total+=this[i];
+   }
+   mean = total/this.length;
+   for(j=0;j<this.length;j+=1){
+       diffSqredArr.push(Math.pow((this[j]-mean),2));
+   }
+   return (Math.sqrt(diffSqredArr.reduce(function(firstEl, nextEl){
+            return firstEl + nextEl;
+          })/this.length));
+};
+
+var display;
+var times = [[],[]];
+var interval = 1;
+var pics = 3;
+var currentPic = 0;
+var picNames = ['noise-small','noise-vsmall'];
+var resolution = ['200*200','10*10'];
+
+var options = {
+    title: 'SVG Filtering Times for Pictures with Different Resolutions',
+    vAxis: {title:"Image Resolution"},
+    hAxis: {title:"Processing Time (ms)"},
+    width: 900,
+    height: 500,
+    bar: {groupWidth: "95%"},
+    legend: { position: "none" },
+};
+
+var data = [['Picture','Time']];
+
+function nextedge(){
+    start = performance.now();
+    stop = start;
+    count = 0;
+    while(start == stop){
+        stop = performance.now();
+        count++;
+    }
+    return [count,start,stop];
+}
+//calculate tick grain
+var tick_grain = 1;
+for(i = 0; i < 100; i++){
+    nextedge();
+    [exp,start,stop] = nextedge();
+    tick_grain = Math.min((stop-start)/exp, tick_grain);
+}
+
+function execute(){
+    display = document.getElementById('frame');
+    display.src = 'SvgFilter.html?img='+ picNames[currentPic] + '.png' + '&grain=' + tick_grain;;
+}
+
+function finish(avg){
+    times[currentPic].push(avg);
+    if(interval < 6){
+        interval++;
+        currentPic = (currentPic+1)%(picNames.length);
+        execute();
+    }
+    else{
+        //console.log(resolution[currentPic],times.stanDeviate());
+        /*var sum = times.reduce(function(a, b) { return a+b; });
+        var average = sum / times.length;
+        times.sort();
+        mid = times[Math.round((times.length - 1) / 2)];*/
+        //console.log(average,mid);
+        //res0 = times[0].reduce(function(a, b) { return a+b; }) / times[0].length;
+        //res1 = times[1].reduce(function(a, b) { return a+b; }) / times[1].length;
+        times[0].sort();
+        res0 = times[0][Math.round((times[0].length - 1) / 2)];
+        times[1].sort();
+        res1 = times[1][Math.round((times[1].length - 1) / 2)];
+
+        if(res0 < res1){
+            interval = 1;
+            currentPic=0;
+            //console.log(times);
+            times=[[],[]];
+            execute();
+        }else{
+            console.log(times);
+            data.push([resolution[0],res0]);
+            data.push([resolution[1],res1]);
+            drawChart();
+        }
+    }
+}
+
+function drawChart() {
+    console.log(data);
+    var view = new google.visualization.DataView(google.visualization.arrayToDataTable(data));
+    var chart = new google.visualization.BarChart(document.getElementById("chart_div"));
+    chart.draw(view, options);
+}
+
+    </script>
+
+    <body onload="execute()">
+        <div id = 'chart_div' width=900 height=500></div>
+        <iframe id='frame' height=1080 width=1920></iframe>
+    </body>
+
+</html>

@@ -35,8 +35,8 @@ function nextedge(){
 }
 
 var display;
-var times = [];
-var interval = 0;
+var times = [[],[]];
+var interval = 1;
 var pics = 3;
 var currentPic = 0;
 var picNames = ['white-small','black-small'];
@@ -71,39 +71,37 @@ function execute(){
 }
 
 function finish(avg){
-    times.push(avg);
-    if(interval < 9){
+    times[currentPic].push(avg);
+    if(interval < 6){
         interval++;
+        currentPic = (currentPic+1)%(picNames.length);
         execute();
     }
     else{
-        interval = 0;
-        console.log(resolution[currentPic],times.stanDeviate());
-        var sum = times.reduce(function(a, b) { return a+b; });
+        //console.log(resolution[currentPic],times.stanDeviate());
+        /*var sum = times.reduce(function(a, b) { return a+b; });
         var average = sum / times.length;
         times.sort();
-        mid = times[Math.round((times.length - 1) / 2)];
+        mid = times[Math.round((times.length - 1) / 2)];*/
         //console.log(average,mid);
-        data.push([resolution[currentPic],mid]);
-        first = 0;
-        second = 0;
-        if(pre.length > 0){
-            for(var i = 0; i < pre.length; i++){
-                if(pre[i] > times[i])first++;
-                else second++;
-            }
-            console.log("result", first, second);
-        }
-        pre = times;
-        times = [];
+        //res0 = times[0].reduce(function(a, b) { return a+b; }) / times[0].length;
+        //res1 = times[1].reduce(function(a, b) { return a+b; }) / times[1].length;
+        times[0].sort();
+        res0 = times[0][Math.round((times[0].length - 1) / 2)];
+        times[1].sort();
+        res1 = times[1][Math.round((times[1].length - 1) / 2)];
 
-        if(currentPic == picNames.length-1){
-            drawChart();
-        }
-
-        if(currentPic < picNames.length-1){
-            currentPic++;
+        if(res0 < res1){
+            interval = 1;
+            currentPic=0;
+            console.log(times);
+            times = [[],[]];
             execute();
+        }else{
+            console.log(times);
+            data.push([resolution[0],res0]);
+            data.push([resolution[1],res1]);
+            drawChart();
         }
     }
 }
