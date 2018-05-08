@@ -152,7 +152,7 @@ let grain;  // The supposed difference between two ticks of performance.now
     console.log("Stadard deviation for an uncached access: " + uncachedList.stanDeviate());
     console.log("Average time for an cached access: " + (cachedTotal / (numTests * timesRan)));
     console.log("Stadard deviation for an cached access: " + cachedList.stanDeviate());
-    drawChart();
+    setTimeout(drawChart,1000);
 }
 
 function drawChart() {
