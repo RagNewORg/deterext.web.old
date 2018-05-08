@@ -39,11 +39,11 @@ function doImageDecode(index)
             timeofsp.push(end-start);
             doImageDecode(index);
         }else{
-            timeofsp.sort(sortNumber);
-            timesofsp.push([index*1.2,timeofsp[Math.floor(timeofsp.length/2)]]);
-            //var sum = timeofsp.reduce(function(a, b) { return a + b; });
-            //var avg = sum / timeofsp.length;
-            //timesofsp.push([index*1.2,avg]);
+            //timeofsp.sort(sortNumber);
+            //timesofsp.push([index*1.2,timeofsp[Math.floor(timeofsp.length/2)]]);
+            var sum = timeofsp.reduce(function(a, b) { return a + b; });
+            var avg = sum / timeofsp.length;
+            timesofsp.push([index*1.2,avg]);
             sizes.push(index);
             current = 0;
             timeofsp = [];
