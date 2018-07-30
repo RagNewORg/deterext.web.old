@@ -26,3 +26,6 @@ document.getElementById('image-async-test-button').onclick = function(){
 document.getElementById('float-test-button').onclick = function(){
     test('./js/pixelStealing/testPS.html');
 };
+document.getElementById('loopscan-test-button').onclick = function(){
+    test('./js/loopscan.html');
+};
