@@ -29,3 +29,9 @@ document.getElementById('float-test-button').onclick = function(){
 document.getElementById('loopscan-test-button').onclick = function(){
     test('./js/loopscan.html');
 };
+document.getElementById('loopscan-worker-test-button').onclick = function(){
+    test('./js/loopscan_worker.html');
+};
+document.getElementById('paper-demo-button').onclick = function(){
+    test('./js/paper_demo/paper_demo.html');
+};

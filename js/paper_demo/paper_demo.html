@@ -1,0 +1,31 @@
+<html>
+<body>
+<style>.f { filter: url(#morphology) } </style>
+<img src="../../../img/logo.jpg" id="e">
+<svg>
+  <filter id="morphology">
+  <feMorphology operator="erode" radius="30">
+  </filter>
+</svg>
+<div id="res"></div>
+
+<script>
+worker = new Worker("paper_demo_worker.js");
+startTime = performance.now();
+worker.onmessage = function (event) {
+  count = event.data;
+  NUM = 10000;
+  if (event.data == NUM) {
+   tick = (performance.now() - startTime)/NUM;
+   callback = function(){
+     asyncTimerDuration = tick * (count - NUM);
+     r = document.getElementById("res");
+     r.innerHTML="Duration of transformation: " + asyncTimerDuration;
+   }
+   document.getElementById("e").classList.toggle('f');
+   requestAnimationFrame(callback);
+  } 
+}
+</script>
+</body>
+</html>

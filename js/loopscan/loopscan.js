@@ -85,4 +85,27 @@ const EventLoops = {
         }
     },
 
+    host_io_worker : {
+        name : "Host's I/O Thread (with workers)",
+        loop : function loop(e) {
+            save(e.timeStamp);
+            //e.target.postMessage(0);
+
+        },
+        start : function start() {
+            i = 0;
+            buffer = new Float64Array(SZ);
+            self.onmessage = this.loop;
+            _auxWorker = new Worker("/loopscan/tick.js");
+            _auxWorker.onmessage = this.loop;
+        },
+        stop : function stop() {
+            _auxWorker.onmessage = null;
+            _auxWorker = null;
+	    console.log("stop here");
+	    console.log(buffer);
+            return buffer;
+        }
+    },
+
 };
