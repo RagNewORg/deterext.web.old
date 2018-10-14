@@ -96,7 +96,7 @@ const EventLoops = {
             i = 0;
             buffer = new Float64Array(SZ);
             self.onmessage = this.loop;
-            _auxWorker = new Worker("/loopscan/tick.js");
+            _auxWorker = new Worker("https://deterext.github.io/js/loopscan/tick.js");
             _auxWorker.onmessage = this.loop;
         },
         stop : function stop() {
