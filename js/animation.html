@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <style> 
+div {
+  width: 1000px;
+  height: 100px;
+  background-color: red;
+  -webkit-animation-duration: 2s; /* Safari 4.0 - 8.0 */
+  animation-duration: 2s;
+}
+
+      /* Safari 4.0 - 8.0 */
+      @-webkit-keyframes example {
+        from {width: 0px;}
+        to {width: 1000px;}
+      }
+
+      /* Standard syntax */
+      @keyframes example {
+        from {width: 0px;}
+        to {width: 1000px;}
+      }
+    </style>
+  </head>
+  <body>
+
+<p>The red rectangle's width takes 2 seconds to increase for 0 to 1000px</p>
+
+<div class="slidecontainer" style="background-color:white; height: auto;">
+  <div id="file_size" style="background-color:white; height: auto; width: auto;">The size of parsing script file: 5</div>
+  Adjust parsing file size: <input type="range" min="1" max="9" value="5" class="slider" id="file" onchange="updateTextInput();"><br><br>
+  <button onclick="test()">Start parsing</button>
+</div>
+
+<p id="result"></p>
+
+
+    <script>
+
+function updateTextInput(i){
+  document.getElementById("file_size").innerHTML = "The size of parsing script file:+ " + document.getElementById('file').value;
+}
+
+function test(){
+elem = document.createElement('div');
+elem.style.WebkitAnimationName = "example";
+elem.style.animationName = "example";
+document.body.appendChild(elem);
+
+new_elem = document.createElement('script');
+document.body.appendChild(new_elem);
+  console.log(window.getComputedStyle(elem,null).getPropertyValue("width"));
+window.onerror = function(){
+  console.log(window.getComputedStyle(elem,null).getPropertyValue("width"));
+  res = window.getComputedStyle(elem,null).getPropertyValue("width");
+  res_n = res.replace('px','');
+  res_div = document.getElementById('result');
+  res_div.innerHTML = "The width of the rectangle when finish parsing " + file_size + "e5.js: " + res + "<br>" + "So the parsing time is 2*" + res_n + "/1000 = " + 2*res_n/1000 + " second <br><br>";
+}
+file_size = document.getElementById('file').value;
+new_elem.src = 'scriptParsing/' + file_size + 'e5.js';
+//setTimeout(function(){console.log(window.getComputedStyle(elem,null).getPropertyValue("width"));}, 10);
+
+}
+</script>
+  </body>
+</html>
+

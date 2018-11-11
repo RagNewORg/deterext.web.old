@@ -35,3 +35,9 @@ document.getElementById('loopscan-worker-test-button').onclick = function(){
 document.getElementById('paper-demo-button').onclick = function(){
     test('./js/paper_demo/paper_demo.html');
 };
+document.getElementById('css-test-button').onclick = function(){
+    test('./js/animation.html');
+};
+document.getElementById('shared-buffer-test-button').onclick = function(){
+    test('./js/scriptParsing/ScriptParse_shared_buffer.html');
+};
