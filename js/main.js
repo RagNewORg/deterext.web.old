@@ -41,3 +41,6 @@ document.getElementById('css-test-button').onclick = function(){
 document.getElementById('shared-buffer-test-button').onclick = function(){
     test('./js/scriptParsing/ScriptParse_shared_buffer.html');
 };
+document.getElementById('webvtt-test-button').onclick = function(){
+    test('./webvtt/attack.html');
+};

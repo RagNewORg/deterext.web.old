@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script src="timer.js"></script>
+</head>
+<body>
+
+<p>This demo use webvtt to measure the duration of i++ execution.</p>
+
+<div class="slidecontainer" style="background-color:white; height: auto;">
+<div id="file_size" style="background-color:white; height: auto; width: auto;">Execute i++ for 1e8 times.</div>
+Adjust the number of i++: <input type="range" min="8" max="9" value="8" class="slider" id="file" onchange="updateTextInput();"><br><br>
+<button id="start_btn" onclick="test()" disabled=true>Start Attacking</button>
+<button id="start_sto_btn" onclick="test_sto()" disabled=true>Start Testing setTimeout</button>
+</div>
+
+<video id="myVideo" width="320" height="176">
+<source src="video.mp4" type="video/mp4">
+<track id="time_track" src="subtitles.vtt" kind="subtitles" srclang="en" label="English" onload="load_subtitles()"/>
+Your browser does not support HTML5 video.
+</video>
+
+<p id="result"></p>
+
+
+<script>
+
+var vid = document.getElementById("myVideo");
+console.log(vid.textTracks);
+vid.textTracks[0].mode = "showing";
+
+function updateTextInput(i){
+	document.getElementById("file_size").innerHTML = "Execute i++ for 1e" + document.getElementById('file').value + " times.";
+}
+
+function test(){
+	vid.play();
+	process();	
+}
+
+function test_sto(){
+	vid.play();
+	process_sto();	
+}
+
+function process_sto(){
+	start = get_time();
+	setTimeout(function(){
+		t_t = document.getElementById("myVideo").textTracks[0];
+		end = get_time();
+		res_div = document.getElementById('result');
+		res_div.innerHTML = "setTimeout(cb,1000) times takes " + (end - start) + " second <br><br>";
+	},1000);
+	return;
+}
+
+function process(){
+	start = get_time();
+	console.log("start", start);
+	input = parseInt(document.getElementById('file').value);
+	c = 1;
+	for(i = 0; i < input; i++)c*=10;
+	i = 0;
+	while(i< c)i++;
+	setTimeout(function(){
+		t_t = document.getElementById("myVideo").textTracks[0];
+		end = get_time();
+		console.log("end", end);
+		res_div = document.getElementById('result');
+		res_div.innerHTML = "Executing i++ for "+ c +" times takes " + (end - start) + " second <br><br>";
+	},0);
+	return;
+}
+
+function load_subtitles(){
+	b = document.getElementById('start_btn');
+	b.disabled = false;
+	b = document.getElementById('start_sto_btn');
+	b.disabled = false;
+}
+</script>
+</body>
+</html>
+
